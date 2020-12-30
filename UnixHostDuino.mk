@@ -37,6 +37,7 @@
 # Type 'make clean' to remove intermediate files.
 
 # Detect Linux or MacOS
+
 UNAME := $(shell uname)
 
 # UnixHostDuino module directory.
@@ -102,15 +103,15 @@ SRCS := ${SRCS} $(wildcard *.cpp) $(wildcard */*.cpp)
 
 # Objects including *.o from *.ino
 OBJS += $(SRCS:%.cpp=%.o) $(APP_NAME).o
-
+#vpath %.o ./build
 $(APP_NAME).out: $(OBJS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $(addprefix build/,$(^F)) $(LDFLAGS)
 
-$(APP_NAME).o: $(APP_NAME).ino
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++ -c $<
+$(APP_NAME).o: $(APP_NAME).cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++ -c $^ -o build/$(@F)
 
 %.o: %.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o build/$(@F)
 
 # This simple rule does not capture all header dependencies of a given cpp
 # file. Maybe it's better to make each cpp to depend on all headers of a given
@@ -123,4 +124,5 @@ $(APP_NAME).o: $(APP_NAME).ino
 all: $(APP_NAME).out
 
 clean: $(MORE_CLEAN)
-	rm -f $(OBJS) $(APP_NAME).out $(GENERATED)
+	rm -f $(APP_NAME).out $(GENERATED)
+	rm -rf build/*
