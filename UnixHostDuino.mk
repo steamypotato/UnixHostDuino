@@ -48,17 +48,17 @@ UNIX_HOST_DUINO_LIB_DIR := $(abspath $(UNIX_HOST_DUINO_DIR)/..)
 # List of Arduino IDE library folders, both built-in to the Arduino IDE
 # and those downloaded later, e.g. in the portable/ directory or .arduino15/
 # directory.
-ARDUINO_LIB_DIRS ?=
+SOURCE_DIRS_PATH ?=
 
 # Default modules which are automatically linked in: UnixHostDuino/
 DEFAULT_MODULES := $(UNIX_HOST_DUINO_DIR)
 
 # Look for the ARDUINO_LIBS modules under each of the ARDUINO_LIB_DIRS and
 # UNIX_HOST_DUINO_LIB_DIR.
-APP_MODULES := $(foreach lib,$(ARDUINO_LIBS),${UNIX_HOST_DUINO_LIB_DIR}/${lib})
+APP_MODULES := $(foreach lib,$(SOURCE_DIRS),${UNIX_HOST_DUINO_LIB_DIR}/${lib})
 APP_MODULES += \
-	$(foreach lib_dir,$(ARDUINO_LIB_DIRS),\
-		$(foreach lib,$(ARDUINO_LIBS),\
+	$(foreach lib_dir,$(SOURCE_DIRS_PATH),\
+		$(foreach lib,$(SOURCE_DIRS),\
 			${lib_dir}/${lib}\
 		)\
 	)
@@ -104,14 +104,15 @@ SRCS := ${SRCS} $(wildcard *.cpp) $(wildcard */*.cpp)
 # Objects including *.o from *.ino
 OBJS += $(SRCS:%.cpp=%.o) $(APP_NAME).o
 #vpath %.o ./build
+#Note that by removing the @ in front of $(CXX) the compilation will be logged
 $(APP_NAME).out: $(OBJS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $(addprefix build/,$(^F)) $(LDFLAGS)
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $(addprefix build/obj/,$(^F)) $(LDFLAGS)
 
 $(APP_NAME).o: $(APP_NAME).cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++ -c $^ -o build/$(@F)
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++ -c $^ -o build/obj/$(@F)
 
 %.o: %.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o build/$(@F)
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o build/obj/$(@F)
 
 # This simple rule does not capture all header dependencies of a given cpp
 # file. Maybe it's better to make each cpp to depend on all headers of a given
@@ -125,4 +126,4 @@ all: $(APP_NAME).out
 
 clean: $(MORE_CLEAN)
 	rm -f $(APP_NAME).out $(GENERATED)
-	rm -rf build/*
+	rm -rf build
