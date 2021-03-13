@@ -37,6 +37,9 @@
 # Type 'make clean' to remove intermediate files.
 
 # Detect Linux or MacOS
+DIRS=build/bin build/obj
+$(shell mkdir -p $(DIRS))
+
 
 UNAME := $(shell uname)
 
@@ -130,3 +133,4 @@ all: $(APP_NAME).out
 clean: $(MORE_CLEAN)
 	rm -f $(APP_NAME).out $(GENERATED)
 	rm -rf build
+
